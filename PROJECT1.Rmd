@@ -1,0 +1,107 @@
+---
+title: "PROJECT 1"
+author: "Rifa Momin"
+date: "2023-09-19"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r global_options, echo=FALSE}
+knitr::opts_chunk$set(fig.height=5, fig.width=7, warning=FALSE, tidy=TRUE, tidy.opts=list(width.cutoff=60))
+
+library(ggplot2)
+
+games <- read.csv('Project1_videogames.csv')
+
+games_ggplot <- ggplot(games)
+
+```
+
+# Introduction (Question 1)
+
+The data was collected by Dr. Joe Cox, associate head for Research and Innovation at the University of Portsmouth who was investigating the following question: what makes a blockbuster video game? The dataset includes information on sales and playtime across hundreds of video games from 2004-2010  and has the following variables:
+
+1. Title of the video game
+2. Publisher of the game
+3. Genre
+4. Year game was released
+5. Rating (ex: T, E, M)
+6. Console (ex: Sony PSP, Nintendo DS)
+7. Maximum number of players
+8. How many hours the average user takes to finish the game
+9. Total sales in millions of dollars
+10. Average review score from **0-100** of video games released between 2004 and 2008.
+
+I chose **average review score as my outcome**, and the following three variables as my investigated predictors:
+
+1. Genre -- what genre is the video game categorized as?
+2. Rating -- is the video game rated teen, explicit, or mature?
+3. Publisher -- who was the video game published by?
+
+![Ekkaphan Chimpalee, *Getty Images*](https://media.wired.com/photos/62feb60bcea7c0581e825cb0/master/w_960,c_limit/Fate-of-Game-Preservation-Games-GettyImages-1170073827.jpg){width=50%}
+
+
+
+# Outcome Variable Distribution (Question 2)
+
+```{r, echo=FALSE}
+
+games_ggplot + geom_histogram(aes(x=ReviewScore),binwidth=2, fill='thistle', color='grey2') + labs(x="Average Review Score", y="Frequency", title= " Distribution of Average Review Score", subtitle=" Average review score from 0-100 video games released between 2004 and 2008.")
+
+```
+
+The outcome variable I am investigating is average review score for a game, which can be impacted by several factors including genre, rating, and publisher of the video game. This was a vital variable to measure as it allows the researcher to investigate their question on making blockbuster video games. The data appears to be unimodal and slightly skewed left. The data has a maximum review score of **`r max(games$ReviewScore, na.rm=TRUE)`** and a minimum review score of **`r min(games$ReviewScore)`**. The mean review score is **`r round(mean(games$ReviewScore, na.rm=TRUE),2)`** and the median review score is **`r round(median(games$ReviewScore),2)`**.
+
+# Bivariate Relationships (Question 3)
+
+#### **Reviews and Rating**
+``` {r echo=FALSE}
+games_ggplot + geom_histogram(aes(x=ReviewScore),binwidth=10,col='black',fill='pink2')  + labs(title='Video Game Review Scores by Rating',x='Average Review Score',y='Frequency') + facet_wrap(~Rating)
+
+
+```
+
+The histograms above display that all the distribution of review scores are all skewed left for all three of ratings. The mean score for the explicitly rated games is **`r round(mean(games$ReviewScore[games$Rating == 'E']),2)`** , **`r round(mean(games$ReviewScore[games$Rating == 'M']),2)`** for mature rated games, and **`r round(mean(games$ReviewScore[games$Rating == 'T']),2)`** for teen rated games. The medians for explicit, mature, and teen rated games are **`r median(games$ReviewScore[games$Rating == 'E'])`**, **`r median(games$ReviewScore[games$Rating == 'M'])`**, and **`r median(games$ReviewScore[games$Rating == 'T'])`**, respectively. The histogram for E and T rated games show potential outliers in the 0-25 and 90-100 ranges for review scores. This data suggests that review scores, regardless of rating, typically score around high 60s, low 70s. All three ratings average around  70 for review scores, though the **medians for mature and teen rated video games are slightly higher than explict rated games**.
+
+#### **Reviews and Genre**
+
+
+```{r echo=FALSE}
+
+games$Genre_new = games$Genre
+games$Genre_new[games$Genre != "Action"] = 'Other'
+
+
+ggplot(games) + geom_boxplot(aes(x=ReviewScore), fill='powderblue') + labs (title='Video Game Review Scores by Genre', x= 'Average Review Score') + facet_wrap(~Genre_new)
+```
+
+The mean for action video game review scores is **`r round(mean(games$ReviewScore[games$Genre_new == "Action"]),2)`** with a median score of **`r median(games$ReviewScore[games$Genre_new == "Action"])`**. The mean review score for the other genres is **`r round(mean(games$ReviewScore[games$Genre_new == "Other"]),2)`** with a median score of **`r median(games$ReviewScore[games$Genre_new == "Other"])`**. This data suggests that **other genres typically have slightly higher ratings than action video games**. However, it is important to recognize that action video games appeared more frequently in the data. There are also outliers in both boxplots that may skew the mean of the data. Taking the median of the data, fortunately, accounts for the impacts of outliers.
+
+#### **Reviews and Publisher**
+
+
+```{r echo=FALSE}
+
+games$Publisher_new = games$Publisher
+games$Publisher_new[games$Publisher != "Nintendo" & games$Publisher != "Microsoft"] = "Other"
+
+ggplot(games) + geom_boxplot(aes(x=ReviewScore), fill='darkseagreen') + labs(title='Video Game Review Scores by Publisher', x= 'Average Review Score') + facet_wrap(~Publisher_new)
+```
+
+The mean review scores for Microsoft, Nintendo, and other publishers are, respectively, **`r round(mean(games$ReviewScore[games$Publisher_new == "Microsoft"]),2)`**, **`r round(mean(games$ReviewScore[games$Publisher_new == "Nintendo"]),2)`**, and **`r round(mean(games$ReviewScore[games$Publisher_new == "Other"]),2)`**. The median review scores for Microsoft, Nintendo, and other publishers are, respectively, **`r median(games$ReviewScore[games$Publisher_new == "Microsoft"])`**, **`r median(games$ReviewScore[games$Publisher_new == "Nintendo"])`**, and **`r median(games$ReviewScore[games$Publisher_new == "Other"])`**. This data suggests that **Microsoft and Nintendo tend to produce video games that typically garner higher review scores from audiences**, compared to video games produced by other publishers. Additionally, the only outliers for other publishers all reside in the low range of review scores.
+
+# Conclusion (Question 4)
+
+In conclusion, explcit and teen rated video games had both higher medians and means compared to mature rated video games. Genres other than action also received higher median and mean review scores. Microsoft and Nintendo published games tended to receive higher scores than other publishers. My findings suggest that there is more discrepancy in reviews based on publishers compared to the other predictors investigated. On the other hand, the rating of the game did not have as much of a difference compared to publisher or genre. For future studies, I would also look into demographics. Gender, race, and age breakdown of the consumers of the game are also vital to understand how people will rate their games. 
+
+## References
+
+Bart, A. C. (2017, March 13). Video games csv file. Github. https://corgis-edu.github.io/corgis/csv/video_games/
+
+Chimpalee, Ekkaphan. *WIRED*, Getty Images, 2022, www.wired.com/story/fate-future-video-game-preservation-you/. Accessed 19 Sept. 2023.
+
+Cox, J. (2014). What makes a blockbuster video game? an empirical analysis of US sales data. *Managerial & Decision Economics*, *35(3)*, 189-198. https://doi.org/10.1002/mde.2608
